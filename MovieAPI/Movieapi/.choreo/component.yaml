@@ -3,7 +3,27 @@ endpoints:
     - name: getmovies-21a
       displayName: GetMovies
       service:
-        basePath: /movies
+        basePath: /api/movies
+        port: 8000
+      type: REST
+      networkVisibilities:
+        - Project
+        - Public
+
+    - name: auth-api
+      displayName: AuthAPI
+      service:
+        basePath: /api/auth
+        port: 8000
+      type: REST
+      networkVisibilities:
+        - Project
+        - Public
+
+    - name: admin-interface
+      displayName: AdminInterface
+      service:
+        basePath: /admin
         port: 8000
       type: REST
       networkVisibilities:
