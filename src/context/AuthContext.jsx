@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
@@ -6,101 +6,159 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
-  const [tokens, setTokens] = useState(() =>
-    localStorage.getItem("access")
-      ? {
-          access: localStorage.getItem("access"),
-          refresh: localStorage.getItem("refresh"),
-        }
-      : null
-  );
-    const storedUser = (() => {
+  // Initialize tokens from localStorage
+  const [tokens, setTokens] = useState(() => {
+    const access = localStorage.getItem("access");
+    const refresh = localStorage.getItem("refresh");
+    return access && refresh ? { access, refresh } : null;
+  });
+
+  // Initialize user from localStorage
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // --- Fetch full user profile ---
+  const fetchUserProfile = useCallback(async (accessToken) => {
     try {
-      const item = localStorage.getItem("user")
-      return item ? JSON.parse(item) : null;
-    }catch (error) {
+      const res = await fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data;
+    } catch (err) {
       return null;
     }
-  })();
+  }, []);
 
-  const [user, setUser] = useState(storedUser)
+  // --- LOGIN ---
+  const login = useCallback(
+    async (username, password) => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/auth/login/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
 
-  // LOGIN
-  const login = async (username, password) => {
-    const res = await fetch("http://127.0.0.1:8000/api/login/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+        const data = await res.json();
 
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem("access", data.access);
-      localStorage.setItem("refresh", data.refresh);
+        if (!res.ok) {
+          return { success: false, error: data.detail || "Login failed" };
+        }
 
-      setTokens(data);
-      setUser({ username });
+        localStorage.setItem("access", data.access);
+        localStorage.setItem("refresh", data.refresh);
+        setTokens({ access: data.access, refresh: data.refresh });
 
-      localStorage.setItem("user", JSON.stringify({ username }));
+        const profile = await fetchUserProfile(data.access);
+        if (profile) {
+          setUser(profile);
+          localStorage.setItem("user", JSON.stringify(profile));
+        }
 
-      navigate("/");
-    } else {
-      alert("Invalid login");
-    }
-  };
+        navigate("/"); // redirect to home
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: "Network error" };
+      }
+    },
+    [navigate, fetchUserProfile]
+  );
 
-  // REGISTER
-  const register = async (username, password, email) => {
-    const res = await fetch("http://127.0.0.1:8000/api/register/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, email }),
-    });
+  // --- REGISTER ---
+  const register = useCallback(
+    async (username, password, email, first_name, last_name, phone, country) => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/auth/register/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, email, first_name, last_name, phone, country }),
+        });
 
-    if (res.ok) {
-      navigate("/login");
-    } else {
-      alert("Registration failed");
-    }
-  };
+        const data = await res.json();
+        if (!res.ok) {
+          return { success: false, error: data.detail || "Registration failed" };
+        }
 
-  // LOGOUT
-  const logout = () => {
+        navigate("/login");
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: "Network error" };
+      }
+    },
+    [navigate]
+  );
+
+  // --- LOGOUT ---
+  const logout = useCallback(() => {
     setTokens(null);
     setUser(null);
-    localStorage.clear();
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
     navigate("/login");
-  };
+  }, [navigate]);
 
-  // AUTO TOKEN REFRESH
-  const refreshToken = async () => {
+  // --- REFRESH TOKEN ---
+  const refreshToken = useCallback(async () => {
     if (!tokens?.refresh) return;
 
-    const res = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh: tokens.refresh }),
-    });
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/auth/token/refresh/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh: tokens.refresh }),
+      });
 
-    if (res.ok) {
+      if (!res.ok) {
+        logout();
+        return;
+      }
+
       const data = await res.json();
       localStorage.setItem("access", data.access);
       setTokens((prev) => ({ ...prev, access: data.access }));
-    } else {
+
+      // Update user profile after refresh
+      const profile = await fetchUserProfile(data.access);
+      if (profile) {
+        setUser(profile);
+        localStorage.setItem("user", JSON.stringify(profile));
+      }
+    } catch (err) {
       logout();
     }
-  };
+  }, [tokens, logout, fetchUserProfile]);
 
+  // --- Auto refresh every 10 minutes ---
   useEffect(() => {
     const interval = setInterval(() => {
       refreshToken();
-    }, 1000 * 60 * 4); // every 4 mins
+    }, 1000 * 60 * 10);
 
     return () => clearInterval(interval);
-  }, [tokens]);
+  }, [refreshToken]);
 
-  return (
-    <AuthContext.Provider value={{ user, tokens, login, logout, register }}>
+  // --- Refresh token and fetch profile on app load ---
+  useEffect(() => {
+    const initializeAuth = async () => {
+      if (tokens?.refresh) {
+        await refreshToken();
+      }
+      setLoading(false);
+    };
+    initializeAuth();
+  }, []);
+
+    return (
+    <AuthContext.Provider
+      value={{ user, tokens, loading, login, logout, register }}
+    >
       {children}
     </AuthContext.Provider>
   );

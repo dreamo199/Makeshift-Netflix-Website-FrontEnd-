@@ -1,43 +1,36 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import UserProfile, Review
+from django.contrib.auth import get_user_model
+from movies.serializers import MovieSerializer
+
+User = get_user_model()
 
 class RegisterUserSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
-    bio = serializers.CharField(required=False)
-    phone = serializers.CharField(required=False)
-    country = serializers.CharField(required=False)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["first_name", 'last_name', "username", "email", "password",
-                  "avatar", "bio", "phone", "country"]
-        extra_kwargs = {"password": {"write_only": True}}
-
+        fields = ["username", "email", "first_name", "last_name", "phone", "bio", "avatar", "country", "password"]
+        
     def create(self, validated_data):
-        profile_data = {
-            "avatar": validated_data.pop("avatar", None),
-            "bio": validated_data.pop("bio", ""),
-            "phone": validated_data.pop("phone", ""),
-            "country": validated_data.pop("country", ""),
-        }
-
-        user = User.objects.create_user(**validated_data)
-
-        # Add profile fields
-        profile = user.userprofile
-        for key, value in profile_data.items():
-            setattr(profile, key, value)
-        profile.save()
-
+        password = validated_data.pop('password', None)
+        user = User.objects.create_user(**validated_data, password=password)
         return user
     
 class UserProfileSerializer(serializers.ModelSerializer):
+    saved_movies = MovieSerializer(many=True, read_only=True)
     class Meta:
-        model = UserProfile
-        fields = "__all__"
-class ReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
-        fields = ["__all__"]
-        read_only_fields = ("user,")
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone",
+            "bio",
+            "avatar",
+            "country",
+            "saved_movies",
+        ]
+
+

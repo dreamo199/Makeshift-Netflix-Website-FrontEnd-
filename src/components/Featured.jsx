@@ -1,29 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Play, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Featured = ({movie}) => {
 
+  const [ loaded, setLoaded ] = useState(false);
+
     if (!movie) return null;
 
-    const { id, title, poster, release_date, genre, rating, duration, overview} = movie;
+    const { id, title, poster, release_date, genre, rating, duration, overview, backdrop} = movie;
     return(
-    <div className="relative h-[90vh] mt-16">
+    <div className="relative w-full h-screen overflow-hidden mt-10">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src={`http://127.0.0.1:8000${poster}`}
+          src={`http://127.0.0.1:8000${backdrop}`}
           alt={title}
-          className="w-full h-full object-cover object-center rounded-lg"
+          onLoad={() => setLoaded(true)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${loaded ? "opacity-100" : "opacity-0"}`}
         />
-        <div className="absolute inset-0 bg-linear-to-r from-black via-black/60 to-transparent" />
-        <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
+        {loaded && (
+          <>
+            <div className="absolute inset-0 bg-linear-to-r from-black via-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent" />
+          </>
+        )}
       </div>
 
       {/* Content */}
+      {loaded && (
       <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
         <div className="max-w-xl md:max-w-2xl">
-          <h1 className="text-5xl md:text-6xl mb-4">{title}</h1>
+          <h1 className="text-5xl md:text-6xl mb-4 text-left">{title}</h1>
           <div className="flex flex-wrap items-center gap-4 mb-6 text-white/80">
             <span className="flex items-center gap-1">
               ⭐ {rating}
@@ -32,10 +40,15 @@ const Featured = ({movie}) => {
             <span>{duration}</span>
 
           </div>
-          <p className="text-lg text-white/90 mb-8 max-w-xl">
+          <p className="text-sm text-white/90 mb-8 max-w-xl">
             {overview}
           </p>
           <div className="flex gap-4">
+            <button
+              className="flex items-center px-6 py-2 bg-red-600 rounded-lg"
+            >
+              Featured
+            </button>
             <button
               className="flex items-center gap-2 px-8 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
             >
@@ -54,6 +67,7 @@ const Featured = ({movie}) => {
           </div>
         </div>
       </div>
+       )}
     </div>
     );
 }

@@ -1,13 +1,14 @@
 import { Star } from "lucide-react";
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const MovieCard = ({ movie }) => {
   const { id, title, poster, release_date, genre, rating } = movie;
 
   return (
     <Link to={`/movies/${id}/`} style={{ textDecoration: "none", color: "inherit" }}>
-      <div  className="cursor-pointer">
-        <div className="movie-card h-[auto]">
+      <motion.div  className="cursor-pointer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+        <div className="movie-card h-auto">
           <img src={poster} alt={title}/>
           <div className="mt-4">
             <strong><h3>{title}</h3></strong>
@@ -26,7 +27,7 @@ const MovieCard = ({ movie }) => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 };

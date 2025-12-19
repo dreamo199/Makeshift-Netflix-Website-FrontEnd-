@@ -23,7 +23,13 @@
   body {
     font-family: "DM Sans", serif;
     font-optical-sizing: auto;
-    background: #000000;
+    
+  }
+
+  .aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   }
 
   h1 {
@@ -49,14 +55,14 @@
   }
 
   .wrapper {
-    @apply px-5 py-12 xs:p-10 max-w-7xl mx-auto flex flex-col relative z-10;
+    @apply xs:p-10 mx-auto flex flex-col relative z-10 w-screen;
   }
 
   .trending {
-    @apply mt-20;
+    @apply mt-10;
 
     & ul {
-      @apply flex flex-row overflow-y-auto gap-5 -mt-10 w-full hide-scrollbar;
+      @apply flex flex-row overflow-x-auto overflow-y-hidden gap-5 -mt-5 w-full hide-scrollbar;
     }
 
     & ul li {

@@ -13,10 +13,10 @@ import random
 
 
 class MovieList(generics.ListAPIView):
-    queryset = Movie.objects.all()
+    queryset = Movie.objects.order_by('title')
     serializer_class = MovieSerializer
     filter_backends = [filters.OrderingFilter]
-    ordering_fields = ['popularity', 'rating', 'release_date']
+    ordering_fields = ['title']
 
 class PopularMovies(APIView):
     def get(self, request):
@@ -69,7 +69,7 @@ def similar_movies(request, pk):
 
 class RandomFeaturedMovie(APIView):
     def get(self, request, *args, **kwargs):
-        movies = Movie.objects.all()
+        movies = Movie.objects.filter(id=1)
 
         if not movies.exists():
             return Response( {"error": "No movies found"}, status=404)
