@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import Aurora from "../components/Aurora";
 import { Play, User } from "lucide-react";
-import Logo from "../components/logo";
+import Logo from "../components/Logo";
 import { Link } from "react-router-dom";
 import Searchh from "../components/Search";
 import Spinner from "../components/Spinner";
