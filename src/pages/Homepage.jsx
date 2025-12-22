@@ -133,7 +133,7 @@ function Homepage(){
           </div>
         </header>
         <div className='wrapper pt-80px'>
-          <header>
+          <header className='pt-20'>
             <Searchh onSearch={handleSearch}/>
           </header>
           <Featured movie={featured}/>
