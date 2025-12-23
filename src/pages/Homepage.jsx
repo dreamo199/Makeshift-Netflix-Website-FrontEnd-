@@ -8,6 +8,7 @@ import Spinner from '../components/Spinner';
 import Featured from '../components/Featured';
 import { Link } from "react-router-dom";
 import Aurora from '../components/Aurora';
+import { apiFetch } from '../api';
 
 function Homepage(){
 
@@ -28,8 +29,7 @@ function Homepage(){
   // All Movies
   useEffect ( () =>{
     async function loadMovies() {
-    const res = await fetch('http://127.0.0.1:8000/api/movies/')
-    const data = await res.json();
+    const data = await apiFetch('/api/movies/')
       setMovies(data.results || [])
       setResults(data.results)
       setNextPage(data.next)
@@ -47,36 +47,32 @@ function Homepage(){
             return;
           }
       
-          const res = await fetch(`http://127.0.0.1:8000/api/search/movie/?search=${query}`);
-          const data = await res.json();
+          const data = apiFetch(`/api/search/movie/?search=${query}`);
           setResults(data.results || []);
           console.log(data)
         }
 
   // Popular Movies
   useEffect( () => {
-    fetch('http://127.0.0.1:8000/api/movies/popular')
-    .then(res => res.json())
+    apiFetch('/api/movies/popular')
     .then(data => setPopular(data.results ?? data));
   }, []);
 
   // Top Rated Movies
   useEffect( () => {
-    fetch('http://127.0.0.1:8000/api/movies/top_rated')
-    .then(res => res.json())
+    apiFetch('/api/movies/top_rated')
     .then(data => setTopRated(data.results ?? data));
   }, []);
 
   // Featured Movie
   useEffect(() => {
-    fetch("http://localhost:8000/api/movies/featured")
-    .then(res => res.json())
+    apiFetch("/api/movies/featured")
     .then(data => setFeatured(data.results ?? data));
   }, []);
 
   // Upcoming Movie
   useEffect(() => {
-    fetch("http://localhost:8000/api/movies/upcoming")
+    apiFetch("/api/movies/upcoming")
     .then(res => res.json())
     .then(data => setUpcoming(data.results ?? data))
   }, [])
