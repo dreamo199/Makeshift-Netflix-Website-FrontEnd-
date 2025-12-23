@@ -140,7 +140,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`/${movie.poster}`)} alt={movie.title} />
+                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
                 </li>
                 </Link>
               ))}
@@ -153,7 +153,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`/${movie.poster}`)} alt={movie.title} />
+                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
                 </li>
                 </Link>
               ))}
@@ -166,7 +166,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`/${movie.poster}`)} alt={movie.title} />
+                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
                 </li>
                 </Link>
               ))}
