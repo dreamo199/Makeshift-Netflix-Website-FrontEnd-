@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Play, Info } from "lucide-react";
 import { Link } from "react-router-dom";
+import { apiFetch } from "../api";
 
 const Featured = ({movie}) => {
 
@@ -14,7 +15,7 @@ const Featured = ({movie}) => {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src={`http://127.0.0.1:8000${backdrop}`}
+          src={backdrop}
           alt={title}
           onLoad={() => setLoaded(true)}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${loaded ? "opacity-100" : "opacity-0"}`}

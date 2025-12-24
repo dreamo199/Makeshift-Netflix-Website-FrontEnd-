@@ -140,7 +140,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
+                <img src={movie.poster} alt={movie.title} />
                 </li>
                 </Link>
               ))}
@@ -153,7 +153,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
+                <img src={movie.poster} alt={movie.title} />
                 </li>
                 </Link>
               ))}
@@ -166,7 +166,7 @@ function Homepage(){
                 <Link to={`/movies/${movie.id}/`} style={{ textDecoration: "none", color: "inherit" }} key={movie.id}>
                 <li key={movie.id} className = 'top-rated'>
                 <p>{index + 1}</p>
-                <img src={apiFetch(`${movie.poster}`)} alt={movie.title} />
+                <img src={movie.poster} alt={movie.title} />
                 </li>
                 </Link>
               ))}
@@ -196,8 +196,7 @@ function Homepage(){
           </section>
           <div className='flex justify-center gap-4 mt-6'>
             <button disabled={!prevPage} onClick={ async () => {
-          const res = await fetch(prevPage);
-          const data = await res.json();
+          const data = await apiFetch(prevPage);
           setMovies(data.results)
           setNextPage(data.next)
           setPrevPage(data.previous)
